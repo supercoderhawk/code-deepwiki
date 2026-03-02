@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "code-deepwiki": {
+      "source": "supercoderhawk/code-deepwiki",
+      "sourceType": "github",
+      "computedHash": "f4b7d50f994d9a4e81e13fdc58bce755a2ce1f9ee2a754b2b394c8820d3a50e7"
+    }
+  }
+}

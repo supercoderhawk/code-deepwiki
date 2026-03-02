@@ -23,6 +23,8 @@ This repository packages the `code-deepwiki` skill in a standard multi-skill-com
 └── tools/
     ├── install/
     └── publish/
+        ├── push_to_skills_sh.sh
+        └── smithery_payload.template.json
 ```
 
 `.claude-plugin/marketplace.json` exposes this repository as a Claude plugin marketplace catalog entry.
@@ -57,6 +59,12 @@ Install from a remote GitHub repository:
 
 ```bash
 npx -y skills add https://github.com/supercoderhawk/code-deepwiki --skill code-deepwiki
+```
+
+Install using `owner/repo` shorthand (recommended for skills.sh discoverability):
+
+```bash
+npx -y skills add supercoderhawk/code-deepwiki --skill code-deepwiki
 ```
 
 Install specifically for Claude Code:
@@ -105,6 +113,9 @@ Use wrapper scripts from `tools/install`:
 # npx skills wrapper
 bash tools/install/install_via_skills.sh --source . --agent claude-code --yes
 
+# npx skills wrapper (remote source, Codex)
+bash tools/install/install_via_skills.sh --source supercoderhawk/code-deepwiki --agent codex --yes
+
 # Smithery wrapper
 bash tools/install/install_via_smithery.sh --skill supercoderhawk/code-deepwiki --agent github-copilot
 
@@ -152,6 +163,39 @@ python3 -m py_compile skills/code-deepwiki/scripts/scan_repo_context.py
 python3 -m py_compile skills/code-deepwiki/scripts/validate_wiki_output.py
 ```
 
+## Publish to skills.sh (for `npx skills` / Codex discoverability)
+
+There is no dedicated publish endpoint in `skills.sh`. Visibility is driven by `npx skills` install telemetry.
+
+1. Push this repository publicly to GitHub (`supercoderhawk/code-deepwiki`).
+2. Trigger a remote install event with `npx skills add`:
+
+```bash
+npx -y skills add supercoderhawk/code-deepwiki --skill code-deepwiki --agent codex --yes
+```
+
+To install it into your own Codex environment at the same time:
+
+```bash
+npx -y skills add supercoderhawk/code-deepwiki --skill code-deepwiki --agent codex --global --yes
+```
+
+3. Verify discovery results:
+
+```bash
+npx -y skills find code-deepwiki
+```
+
+4. Optional helper script:
+
+```bash
+bash tools/publish/push_to_skills_sh.sh --agent codex
+```
+
+Notes:
+- If telemetry is disabled (`DISABLE_TELEMETRY=1` or `DO_NOT_TRACK=1`), install events may not contribute to ranking/discovery.
+- Use remote source (`owner/repo` or GitHub URL), not local `.` path, when you want skills.sh attribution.
+
 Private repo scan with auth.json fallback token:
 
 ```bash
@@ -162,10 +206,11 @@ python3 skills/code-deepwiki/scripts/scan_repo_context.py \
   --out-dir docs/code-deepwiki
 ```
 
-## Smithery Publish/Update Guide
+## Publish/Update Guides
 
 See `tools/publish/README.md` for:
 
-- prerequisites (`smithery auth login`, namespace ownership, token scope)
-- publish via Smithery console/UI
-- publish or update via API workflow with `tools/publish/smithery_payload.template.json`
+- skills.sh discovery flow (`npx skills add` telemetry + `skills find` verification)
+- helper script `tools/publish/push_to_skills_sh.sh`
+- Smithery prerequisites (`smithery auth login`, namespace ownership, token scope)
+- Smithery publish via console/UI or API (`tools/publish/smithery_payload.template.json`)

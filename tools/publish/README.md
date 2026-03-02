@@ -1,8 +1,52 @@
-# Smithery Publish / Update Guide
+# skills.sh + Smithery Publish / Update Guide
 
-This repository supports Smithery installation and publication workflows for the `code-deepwiki` skill.
+This repository supports publication/discovery workflows for:
+- `skills.sh` via `npx skills`
+- Smithery via `@smithery/cli`
 
-## Prerequisites
+## skills.sh Discovery (npx skills)
+
+`skills.sh` does not provide a separate publish API. Discovery/ranking is derived from anonymous `npx skills add` install telemetry.
+
+### Prerequisites
+
+1. Repository is public: `https://github.com/supercoderhawk/code-deepwiki`
+2. Skill path is valid and discoverable: `skills/code-deepwiki/SKILL.md`
+3. Telemetry is not disabled (`DISABLE_TELEMETRY` / `DO_NOT_TRACK`)
+
+### Trigger Discovery
+
+Run a remote install command (use `owner/repo` or GitHub URL):
+
+```bash
+npx -y skills add supercoderhawk/code-deepwiki --skill code-deepwiki --agent codex --yes
+```
+
+Install globally for local Codex usage:
+
+```bash
+npx -y skills add supercoderhawk/code-deepwiki --skill code-deepwiki --agent codex --global --yes
+```
+
+### Verify Discovery
+
+```bash
+npx -y skills find code-deepwiki
+```
+
+If the result is not visible yet, wait and retry. Directory indexing can lag behind install events.
+
+### Helper Script
+
+```bash
+bash tools/publish/push_to_skills_sh.sh --agent codex
+```
+
+## Smithery Publish / Update
+
+This section covers Smithery publication workflows for the `code-deepwiki` skill.
+
+## Smithery Prerequisites
 
 1. Install Smithery CLI (or use `npx -y @smithery/cli`).
 2. Authenticate:
