@@ -10,7 +10,10 @@ This repository packages the `code-deepwiki` skill in a standard multi-skill-com
 ```text
 .
 ├── README.md
+├── auth.json
 ├── .gitignore
+├── .claude-plugin/
+│   └── marketplace.json
 ├── skills/
 │   └── code-deepwiki/
 │       ├── SKILL.md
@@ -21,6 +24,26 @@ This repository packages the `code-deepwiki` skill in a standard multi-skill-com
     ├── install/
     └── publish/
 ```
+
+`.claude-plugin/marketplace.json` exposes this repository as a Claude plugin marketplace catalog entry.
+
+## `auth.json` (Local Secrets)
+
+Create `auth.json` at repository root and store runtime keys there. This file is ignored by Git to prevent secret leakage.
+
+```json
+{
+  "DEEPWIKI_REPO_TOKEN": "",
+  "SMITHERY_API_KEY": "",
+  "SMITHERY_API_TOKEN": "",
+  "SMITHERY_SKILLS_ENDPOINT": "https://api.smithery.ai/v1/skills"
+}
+```
+
+Notes:
+- `auth.json` is local-only and should never be committed.
+- Script behavior: environment variables still have highest priority.
+- Fallback behavior: when env vars are absent, scripts can read matching keys from `auth.json`.
 
 ## Install with Vercel Skills CLI (`npx skills`)
 
@@ -33,7 +56,7 @@ npx -y skills add . --skill code-deepwiki
 Install from a remote GitHub repository:
 
 ```bash
-npx -y skills add https://github.com/<owner>/<repo> --skill code-deepwiki
+npx -y skills add https://github.com/supercoderhawk/code-deepwiki --skill code-deepwiki
 ```
 
 Install specifically for Claude Code:
@@ -56,16 +79,16 @@ npx -y skills add . --skill code-deepwiki --agent claude-code --global --yes
 
 ## Install with Smithery CLI
 
-Install by Smithery namespace/slug:
+Install by Smithery namespace/slug (`supercoderhawk/code-deepwiki`):
 
 ```bash
-npx -y @smithery/cli skill add <namespace>/<slug> --agent claude-code
+npx -y @smithery/cli skill add supercoderhawk/code-deepwiki --agent claude-code
 ```
 
 Install by skill URL:
 
 ```bash
-npx -y @smithery/cli skill add https://smithery.ai/skills/<namespace>/<slug> --agent github-copilot
+npx -y @smithery/cli skill add https://smithery.ai/skills/supercoderhawk/code-deepwiki --agent github-copilot
 ```
 
 List available Smithery target agents:
@@ -83,7 +106,10 @@ Use wrapper scripts from `tools/install`:
 bash tools/install/install_via_skills.sh --source . --agent claude-code --yes
 
 # Smithery wrapper
-bash tools/install/install_via_smithery.sh --skill <namespace>/<slug> --agent github-copilot
+bash tools/install/install_via_smithery.sh --skill supercoderhawk/code-deepwiki --agent github-copilot
+
+# Smithery wrapper with explicit auth file
+bash tools/install/install_via_smithery.sh --skill supercoderhawk/code-deepwiki --agent github-copilot --auth-file ./auth.json
 ```
 
 ## Usage After Installation
@@ -99,7 +125,7 @@ Use $code-deepwiki to document architecture, core modules, and data flow for thi
 ```
 
 ```text
-Use $code-deepwiki to generate wiki pages for https://github.com/owner/repo with strict citations.
+Use $code-deepwiki to generate wiki pages for https://github.com/supercoderhawk/code-deepwiki with strict citations.
 ```
 
 ## Local Validation
@@ -124,6 +150,16 @@ Smoke-test Python scripts at canonical path:
 ```bash
 python3 -m py_compile skills/code-deepwiki/scripts/scan_repo_context.py
 python3 -m py_compile skills/code-deepwiki/scripts/validate_wiki_output.py
+```
+
+Private repo scan with auth.json fallback token:
+
+```bash
+python3 skills/code-deepwiki/scripts/scan_repo_context.py \
+  --repo-url https://github.com/owner/private-repo \
+  --token-env DEEPWIKI_REPO_TOKEN \
+  --auth-file ./auth.json \
+  --out-dir docs/code-deepwiki
 ```
 
 ## Smithery Publish/Update Guide

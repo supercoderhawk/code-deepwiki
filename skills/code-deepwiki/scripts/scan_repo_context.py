@@ -91,6 +91,26 @@ def normalize_output_language(raw: str) -> str:
   return value
 
 
+def load_auth_config(auth_file: str) -> Dict[str, str]:
+  path = Path(auth_file).expanduser().resolve()
+  if not path.exists():
+    return {}
+  if not path.is_file():
+    raise ValueError(f"Auth file is not a file: {path}")
+  try:
+    parsed = json.loads(path.read_text(encoding="utf-8"))
+  except json.JSONDecodeError as exc:
+    raise ValueError(f"Auth file is not valid JSON: {path} ({exc.msg})") from exc
+  if not isinstance(parsed, dict):
+    raise ValueError(f"Auth file must be a JSON object: {path}")
+
+  values: Dict[str, str] = {}
+  for key, value in parsed.items():
+    if isinstance(key, str) and isinstance(value, str) and value.strip():
+      values[key] = value.strip()
+  return values
+
+
 def detect_repo_type(repo_url: str) -> str:
   host = urlparse(repo_url).netloc.lower()
   if "gitlab" in host:
@@ -100,13 +120,18 @@ def detect_repo_type(repo_url: str) -> str:
   return "github"
 
 
-def read_token(token_env: Optional[str]) -> Optional[str]:
+def read_token(token_env: Optional[str], auth_config: Dict[str, str]) -> Optional[str]:
   if not token_env:
     return None
   token = os.environ.get(token_env)
-  if not token:
-    raise ValueError(f"Environment variable '{token_env}' is not set or empty.")
-  return token
+  if token:
+    return token
+  token = auth_config.get(token_env)
+  if token:
+    return token
+  raise ValueError(
+    f"Token '{token_env}' is missing. Set env var '{token_env}' or add it to auth.json."
+  )
 
 
 def redact_sensitive(text: str, token: Optional[str]) -> str:
@@ -313,6 +338,7 @@ def scan_repository(args: argparse.Namespace) -> int:
   temp_dir: Optional[tempfile.TemporaryDirectory] = None
 
   try:
+    auth_config = load_auth_config(args.auth_file)
     output_language = normalize_output_language(args.output_language)
     if args.repo_path:
       repo_root = Path(args.repo_path).expanduser().resolve()
@@ -322,7 +348,7 @@ def scan_repository(args: argparse.Namespace) -> int:
     else:
       if not args.repo_url.startswith(("http://", "https://")):
         raise ValueError("--repo-url must start with http:// or https://")
-      token = read_token(args.token_env)
+      token = read_token(args.token_env, auth_config)
       repo_type = args.repo_type or detect_repo_type(args.repo_url)
       temp_dir = tempfile.TemporaryDirectory(prefix="code-deepwiki-repo-")
       repo_root = Path(temp_dir.name) / "repo"
@@ -375,6 +401,11 @@ def build_parser() -> argparse.ArgumentParser:
     help="Repository type for remote URLs; auto-detected when omitted.",
   )
   parser.add_argument("--token-env", help="Environment variable name that stores private repo token.")
+  parser.add_argument(
+    "--auth-file",
+    default="auth.json",
+    help="Path to auth JSON file used as fallback when env tokens are missing (default: auth.json).",
+  )
   parser.add_argument("--include-dirs", default="", help="Comma or newline separated directory filters.")
   parser.add_argument("--include-files", default="", help="Comma or newline separated file filters.")
   parser.add_argument("--exclude-dirs", default="", help="Comma or newline separated directory filters.")

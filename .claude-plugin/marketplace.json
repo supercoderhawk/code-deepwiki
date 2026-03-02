@@ -1,0 +1,22 @@
+{
+  "name": "code-deepwiki-marketplace",
+  "owner": {
+    "name": "supercoderhawk"
+  },
+  "metadata": {
+    "description": "Marketplace catalog for the code-deepwiki skill plugin.",
+    "version": "1.0.0",
+    "homepage": "https://github.com/supercoderhawk/code-deepwiki"
+  },
+  "plugins": [
+    {
+      "name": "code-deepwiki",
+      "description": "Generate multi-page technical wiki documentation from source repositories.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/code-deepwiki"
+      ]
+    }
+  ]
+}

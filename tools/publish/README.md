@@ -11,8 +11,16 @@ This repository supports Smithery installation and publication workflows for the
 npx -y @smithery/cli auth login
 ```
 
-3. Ensure you own or can publish to the target Smithery namespace.
+3. Ensure you own or can publish to the target Smithery namespace (`supercoderhawk`).
 4. Ensure your token has the required scope for skills publish/update operations.
+5. Put publish-related credentials in root `auth.json`:
+
+```json
+{
+  "SMITHERY_API_TOKEN": "",
+  "SMITHERY_SKILLS_ENDPOINT": "https://api.smithery.ai/v1/skills"
+}
+```
 
 ## Option A: Publish via Smithery Console / UI
 
@@ -22,7 +30,7 @@ npx -y @smithery/cli auth login
 4. Verify that installation works via:
 
 ```bash
-npx -y @smithery/cli skill add <namespace>/<slug> --agent claude-code
+npx -y @smithery/cli skill add supercoderhawk/code-deepwiki --agent claude-code
 ```
 
 ## Option B: Publish / Update via API Workflow
@@ -44,8 +52,8 @@ cp tools/publish/smithery_payload.template.json tools/publish/smithery_payload.j
 3. Configure endpoint and token:
 
 ```bash
-export SMITHERY_API_TOKEN="<your-token>"
-export SMITHERY_SKILLS_ENDPOINT="https://api.smithery.ai/v1/skills"
+export SMITHERY_API_TOKEN="$(python3 -c 'import json; print(json.load(open("auth.json","r",encoding="utf-8")).get("SMITHERY_API_TOKEN",""))')"
+export SMITHERY_SKILLS_ENDPOINT="$(python3 -c 'import json; print(json.load(open("auth.json","r",encoding="utf-8")).get("SMITHERY_SKILLS_ENDPOINT","https://api.smithery.ai/v1/skills"))')"
 ```
 
 4. Create/publish:
@@ -60,7 +68,7 @@ curl -X POST "$SMITHERY_SKILLS_ENDPOINT" \
 5. Update (example pattern):
 
 ```bash
-curl -X PUT "$SMITHERY_SKILLS_ENDPOINT/<namespace>/<slug>" \
+curl -X PUT "$SMITHERY_SKILLS_ENDPOINT/supercoderhawk/code-deepwiki" \
   -H "Authorization: Bearer $SMITHERY_API_TOKEN" \
   -H "Content-Type: application/json" \
   --data @tools/publish/smithery_payload.json
@@ -69,6 +77,7 @@ curl -X PUT "$SMITHERY_SKILLS_ENDPOINT/<namespace>/<slug>" \
 ## Guidance for `gitUrl` and Skill Identification
 
 - `gitUrl` should point to this repository root.
+- Current repository `gitUrl`: `https://github.com/supercoderhawk/code-deepwiki`
 - Skill identifier should resolve to `code-deepwiki` under `skills/code-deepwiki`.
 - Keep `SKILL.md` frontmatter `name` as `code-deepwiki`.
 
@@ -78,7 +87,7 @@ After publish/update:
 
 ```bash
 npx -y @smithery/cli skill search code-deepwiki
-npx -y @smithery/cli skill add <namespace>/<slug> --agent github-copilot
+npx -y @smithery/cli skill add supercoderhawk/code-deepwiki --agent github-copilot
 ```
 
 > Note: If your organization uses a different Smithery API base URL or versioned endpoint,

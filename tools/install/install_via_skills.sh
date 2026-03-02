@@ -24,7 +24,7 @@ Examples:
   bash tools/install/install_via_skills.sh --source .
   bash tools/install/install_via_skills.sh --source . --agent claude-code --yes
   bash tools/install/install_via_skills.sh --source . --agent github-copilot --global --yes
-  bash tools/install/install_via_skills.sh --source https://github.com/owner/repo --agent claude-code
+  bash tools/install/install_via_skills.sh --source https://github.com/supercoderhawk/code-deepwiki --agent claude-code
 USAGE
 }
 
