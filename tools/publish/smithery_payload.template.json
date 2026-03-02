@@ -1,0 +1,6 @@
+{
+  "title": "Code DeepWiki",
+  "description": "Generate multi-page technical wiki documentation from source repositories.",
+  "prompt": "Use $code-deepwiki to generate a multi-page technical wiki for this repository.",
+  "gitUrl": "https://github.com/<owner>/<repo>"
+}

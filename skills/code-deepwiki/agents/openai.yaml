@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code DeepWiki"
+  short_description: "Generate multi-page docs from local or remote code repos"
+  default_prompt: "Use $code-deepwiki to generate a multi-page technical wiki for this repository with English/Chinese/French."
